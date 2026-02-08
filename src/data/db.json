@@ -1,0 +1,180 @@
+{
+  "equipments": [
+    {
+      "ID No.": "PC-1,2",
+      "Maker,Model & Type": "COMPUTER CORE I7",
+      "Category": "PC",
+      "Condition": "Unserviceable",
+      "Deployment": "Surplus",
+      "Quantity": 2,
+      "Location": "Software Lab",
+      "Date Received": "2010-09-29",
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "ID No.": "PC-3",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "PC",
+      "Condition": "US",
+      "Deployment": "PT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2011-09-29"
+    },
+    {
+      "id": "3",
+      "ID No.": "PC-4-9",
+      "Maker,Model & Type": "COMPUTER CORE I7",
+      "Category": "PC",
+      "Condition": "RN",
+      "Deployment": "FT",
+      "Quantity": 6,
+      "Location": "Software Lab",
+      "Date Received": "2013-07-01"
+    },
+    {
+      "id": "4",
+      "ID No.": "EPC-1 to 14",
+      "Maker,Model & Type": "COMPUTER CORE I7",
+      "Category": "PC",
+      "Condition": "RN",
+      "Deployment": "FT",
+      "Quantity": 14,
+      "Location": "Elibrary",
+      "Date Received": "2013-07-01"
+    },
+    {
+      "id": "5",
+      "ID No.": "EPC-15",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "PC",
+      "Condition": "US",
+      "Deployment": "PT",
+      "Quantity": 1,
+      "Location": "Elibrary",
+      "Date Received": "2013-07-01"
+    },
+    {
+      "id": "6",
+      "ID No.": "EPC-16",
+      "Maker,Model & Type": "COMPUTER CORE I3",
+      "Category": "Network Device",
+      "Condition": "RN",
+      "Deployment": "RS",
+      "Quantity": 1,
+      "Location": "Elibrary",
+      "Date Received": "2013-07-01"
+    },
+    {
+      "id": "7",
+      "ID No.": "PC-10",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "Digital Device",
+      "Condition": "RP",
+      "Deployment": "FT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2014-02-21"
+    },
+    {
+      "id": "8",
+      "ID No.": "PC-11-29",
+      "Maker,Model & Type": "COMPUTER CORE I7",
+      "Category": "Network Device",
+      "Condition": "W/O",
+      "Deployment": "FT",
+      "Quantity": 19,
+      "Location": "Software Lab",
+      "Date Received": "2014-12-01"
+    },
+    {
+      "id": "9",
+      "ID No.": "PC-30-45",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "PC",
+      "Condition": "RP",
+      "Deployment": "FT",
+      "Quantity": 16,
+      "Location": "Software Lab",
+      "Date Received": "2014-07-28"
+    },
+    {
+      "id": "10",
+      "ID No.": "PC-47",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "Network Device",
+      "Condition": "W/O",
+      "Deployment": "FT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2015-02-16"
+    },
+    {
+      "id": "11",
+      "ID No.": "PC-46",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "Digital Device",
+      "Condition": "US",
+      "Deployment": "FT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2015-02-16"
+    },
+    {
+      "id": "13",
+      "ID No.": "PC-70",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "Network Device",
+      "Condition": "RN",
+      "Deployment": "FT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2015-02-16"
+    },
+    {
+      "id": "14",
+      "ID No.": "PC-60",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "Network Device",
+      "Condition": "US",
+      "Deployment": "FT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2015-02-16"
+    },
+    {
+      "id": "15",
+      "ID No.": "PC-30",
+      "Maker,Model & Type": "COMPUTER CORE I5",
+      "Category": "Network Device",
+      "Condition": "W/O",
+      "Deployment": "FT",
+      "Quantity": 1,
+      "Location": "Software Lab",
+      "Date Received": "2015-02-16"
+    },
+    {
+      "id": "5aa1",
+      "ID No.": "DLAB-1",
+      "Maker,Model & Type": "Multitester(DE 060TR)",
+      "Category": "Network Devices & Accessories",
+      "Condition": "Running",
+      "Deployment": "Part-Time",
+      "Quantity": 1,
+      "Location": "Network & Embedded Lab",
+      "Date Received": "2026-02-08"
+    },
+    {
+      "id": "69cb",
+      "ID No.": "DLAB-4",
+      "Maker,Model & Type": "ODM/OEM-2440",
+      "Category": "Network Devices & Accessories",
+      "Condition": "Running",
+      "Deployment": "Part-Time",
+      "Quantity": 13,
+      "Location": "Network & Embedded Lab",
+      "Date Received": "2026-02-08"
+    }
+  ]
+}
