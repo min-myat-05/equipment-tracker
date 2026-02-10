@@ -17,7 +17,7 @@ interface EquipmentPayload {
   Description?: string;
 }
 
-const api = "http://localhost:3000/equipments";
+const api = "https://equipment-tracker-v1-1.onrender.com/";
 
 export default function AddEquipments() {
   const navigate = useNavigate();
@@ -69,18 +69,18 @@ export default function AddEquipments() {
         setIdNo(data["ID No."] ?? "");
         setModel(data["Maker,Model & Type"] ?? "");
         setCategory(data.Category ?? "PC");
-        setCondition(
-          data.Condition ? normalizeCondition(data.Condition) : ""
-        );
+        setCondition(data.Condition ? normalizeCondition(data.Condition) : "");
         setDeployment(
-          data.Deployment ? normalizeDeployment(data.Deployment) : ""
+          data.Deployment ? normalizeDeployment(data.Deployment) : "",
         );
         setQuantity(Number(data.Quantity) || 0);
         setLocation(data.Location ?? "");
         setDate(data["Date Received"] ?? "");
         setDescription(data.Description ?? "");
       })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)))
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : String(err)),
+      )
       .finally(() => setIsLoading(false));
   }, [isEditing, recordId]);
 
@@ -105,14 +105,11 @@ export default function AddEquipments() {
     };
 
     try {
-      const res = await fetch(
-        isEditing ? `${api}/${recordId}` : api,
-        {
-          method: isEditing ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      const res = await fetch(isEditing ? `${api}/${recordId}` : api, {
+        method: isEditing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       if (!res.ok) throw new Error("Failed to save equipment");
       navigate("/equipments");
     } catch (err) {

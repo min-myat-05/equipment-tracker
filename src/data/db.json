@@ -175,6 +175,17 @@
       "Quantity": 13,
       "Location": "Network & Embedded Lab",
       "Date Received": "2026-02-08"
+    },
+    {
+      "id": "64f3",
+      "ID No.": "UPS-29",
+      "Maker,Model & Type": "Cyber Power CP 1500A VRL CD UPS",
+      "Category": "PC",
+      "Condition": "Running",
+      "Deployment": "Part-Time",
+      "Quantity": 1,
+      "Location": "IT Department",
+      "Date Received": "2026-02-10"
     }
   ]
 }
