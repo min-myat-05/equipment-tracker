@@ -1,4 +1,11 @@
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ConditionProps = {
   value?: string;
@@ -10,23 +17,25 @@ export default function Condition({ value, onChange }: ConditionProps) {
   const currentValue = value ?? localCondition;
   return (
     <div>
-      <select
-        id="condition"
-        name="condition"
-        className="w-full border border-border bg-input text-foreground px-3 py-2 rounded focus:border-ring"
-        value={currentValue}
-        onChange={(event) => {
-          const nextValue = event.target.value;
+      <Select
+        value={currentValue ? currentValue : "select"}
+        onValueChange={(value) => {
+          const nextValue = value === "select" ? "" : value;
           setLocalCondition(nextValue);
           onChange?.(nextValue);
         }}
       >
-        <option value="">Select condition</option>
-        <option value="Running">Running</option>
-        <option value="Repairable">Repairable</option>
-        <option value="Unserviceable">Unserviceable</option>
-        <option value="Write-off">Write-off</option>
-      </select>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select condition" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="select">Select condition</SelectItem>
+          <SelectItem value="Running">Running</SelectItem>
+          <SelectItem value="Repairable">Repairable</SelectItem>
+          <SelectItem value="Unserviceable">Unserviceable</SelectItem>
+          <SelectItem value="Write-off">Write-off</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

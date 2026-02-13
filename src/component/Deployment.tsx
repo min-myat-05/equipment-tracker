@@ -1,4 +1,11 @@
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type DeploymentProps = {
   value?: string;
@@ -10,23 +17,25 @@ export default function Deployment({ value, onChange }: DeploymentProps) {
   const currentValue = value ?? localDeployment;
   return (
     <div>
-      <select
-        id="deployment"
-        name="deployment"
-        className="w-full border border-border bg-input text-foreground px-3 py-2 rounded focus:border-ring"
-        value={currentValue}
-        onChange={(event) => {
-          const nextValue = event.target.value;
+      <Select
+        value={currentValue ? currentValue : "select"}
+        onValueChange={(value) => {
+          const nextValue = value === "select" ? "" : value;
           setLocalDeployment(nextValue);
           onChange?.(nextValue);
         }}
       >
-        <option value="">Select deployment</option>
-        <option value="Full-Time">Full-Time</option>
-        <option value="Part-Time">Part-Time</option>
-        <option value="Reserve">Reserve</option>
-        <option value="Surplus">Surplus</option>
-      </select>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select deployment" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="select">Select deployment</SelectItem>
+          <SelectItem value="Full-Time">Full-Time</SelectItem>
+          <SelectItem value="Part-Time">Part-Time</SelectItem>
+          <SelectItem value="Reserve">Reserve</SelectItem>
+          <SelectItem value="Surplus">Surplus</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./component/LoginForm";
 import Dashboard from "./pages/Dashboard";
 import Equipments from "./pages/Equipments";
@@ -10,6 +10,10 @@ import Network_Device from "./pages/Network_Device";
 export const router = createBrowserRouter([
   {
     path: "/",
+    element: <Navigate to="/login" replace />,
+  },
+  {
+    path: "/login",
     Component: LoginForm,
   },
   {

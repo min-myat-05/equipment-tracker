@@ -1,18 +1,20 @@
 import { titleData } from "../../data/data";
+import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 export default function thead() {
   return (
-    <thead className="border-b border-border">
-      <tr className="text-center h-18">
+    <TableHeader className="border-b border-border bg-muted/50 sticky top-0 z-50">
+      <TableRow className="text-center h-11 bg-muted/50">
         {titleData.map((item) => (
-          <th
+          <TableHead
             key={item.name}
             scope="col"
-            className="sticky top-0 z-20 bg-card/95 backdrop-blur-sm px-4 py-2 text-base font-medium text-foreground"
+            className="text-base font-semibold text-foreground text-center sticky top-0 bg-muted/50"
           >
             {item.name}
-          </th>
+          </TableHead>
         ))}
-      </tr>
-    </thead>
+      </TableRow>
+    </TableHeader>
   );
 }

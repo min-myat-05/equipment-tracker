@@ -5,11 +5,11 @@ import Sidebar from "../component/Sidebar";
 function RootLayout() {
   return (
     <>
-      <div className="flex h-screen overflow-y-auto">
+      <div className="flex overflow-y-auto">
         <div className="w-[15%]">
           <Sidebar />
         </div>
-        <div className="w-[85%] h-dvh">
+        <div className="w-[85%] h-dvh max-w-full mx-auto px-6 py-3">
           <Header />
           <Outlet />
         </div>

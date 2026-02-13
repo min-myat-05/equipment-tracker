@@ -4,6 +4,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import Deployment from "../component/Deployment";
 import Condition from "../component/Condition";
 import Category from "./Category";
+import { Button } from "@/components/ui/button";
+import {
+  getEquipmentById,
+  createEquipment,
+  updateEquipment,
+} from "../services/equitmentService";
 
 interface EquipmentPayload {
   "ID No.": string;
@@ -16,8 +22,6 @@ interface EquipmentPayload {
   "Date Received": string;
   Description?: string;
 }
-
-const api = "https://equipment-tracker-v1-1.onrender.com/";
 
 export default function AddEquipments() {
   const navigate = useNavigate();
@@ -38,13 +42,11 @@ export default function AddEquipments() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!isEditing) return;
+    if (!isEditing || !recordId) return;
+
     setIsLoading(true);
-    fetch(`${api}/${recordId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load equipment");
-        return res.json();
-      })
+
+    getEquipmentById(recordId)
       .then((data: EquipmentPayload) => {
         const normalizeCondition = (value: string) => {
           const key = value.trim().toLowerCase();
@@ -55,6 +57,7 @@ export default function AddEquipments() {
             return "Write-off";
           return value;
         };
+
         const normalizeDeployment = (value: string) => {
           const key = value.trim().toLowerCase();
           if (key === "ft" || key === "full-time" || key === "full time")
@@ -66,17 +69,37 @@ export default function AddEquipments() {
           return value;
         };
 
-        setIdNo(data["ID No."] ?? "");
-        setModel(data["Maker,Model & Type"] ?? "");
-        setCategory(data.Category ?? "PC");
-        setCondition(data.Condition ? normalizeCondition(data.Condition) : "");
-        setDeployment(
-          data.Deployment ? normalizeDeployment(data.Deployment) : "",
+        const normalizeCategory = (value: string) => {
+          const key = value.trim().toLowerCase();
+          if (key.includes("digital")) return "Digital Device";
+          if (key.includes("network")) return "Network Device";
+          if (key.includes("pc")) return "PC";
+          return value;
+        };
+
+        const fromApi = (key: string, fallbackKey: string) =>
+          (data as any)[key] ?? (data as any)[fallbackKey] ?? "";
+
+        setIdNo(fromApi("ID No.", "id_no"));
+        setModel(fromApi("Maker,Model & Type", "maker_model_type"));
+        const rawCategory =
+          (data as any).Category ?? (data as any).category ?? "PC";
+        setCategory(normalizeCategory(rawCategory));
+        const rawCondition =
+          (data as any).Condition ?? (data as any).condition ?? "";
+        const rawDeployment =
+          (data as any).Deployment ?? (data as any).deployment ?? "";
+        setCondition(normalizeCondition(rawCondition));
+        setDeployment(normalizeDeployment(rawDeployment));
+        const qty = Number(
+          (data as any).Quantity ?? (data as any).quantity ?? 0,
         );
-        setQuantity(Number(data.Quantity) || 0);
-        setLocation(data.Location ?? "");
-        setDate(data["Date Received"] ?? "");
-        setDescription(data.Description ?? "");
+        setQuantity(Number.isFinite(qty) ? qty : 0);
+        setLocation(fromApi("Location", "location"));
+        setDate(fromApi("Date Received", "date_received"));
+        setDescription(
+          (data as any).Description ?? (data as any).description ?? "",
+        );
       })
       .catch((err) =>
         setError(err instanceof Error ? err.message : String(err)),
@@ -92,25 +115,32 @@ export default function AddEquipments() {
       setError("ID No. is required");
       return;
     }
-    const payload: EquipmentPayload = {
-      "ID No.": idNo.trim(),
-      "Maker,Model & Type": model.trim(),
-      Category: category,
-      Condition: condition,
-      Deployment: deployment,
-      Quantity: quantity,
-      Location: location.trim(),
-      "Date Received": date,
-      Description: description.trim() || undefined,
+    const normalizeCategory = (value: string) => {
+      const key = value.trim().toLowerCase();
+      if (key.includes("digital")) return "Digital Device";
+      if (key.includes("network")) return "Network Device";
+      if (key.includes("pc")) return "PC";
+      return value;
+    };
+
+    const payload = {
+      id_no: idNo.trim(),
+      maker_model_type: model.trim(),
+      category: normalizeCategory(category),
+      condition: condition,
+      deployment: deployment,
+      quantity: Number.isFinite(quantity) ? quantity : 0,
+      location: location.trim(),
+      date_received: date,
+      description: description.trim() || undefined,
     };
 
     try {
-      const res = await fetch(isEditing ? `${api}/${recordId}` : api, {
-        method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Failed to save equipment");
+      if (isEditing) {
+        await updateEquipment(recordId, payload);
+      } else {
+        await createEquipment(payload);
+      }
       navigate("/equipments");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -119,16 +149,16 @@ export default function AddEquipments() {
 
   return (
     <div className="p-4 bg-background">
-      <div className="max-w-3xl mx-auto bg-card text-card-foreground rounded shadow p-6 sm:p-8">
+      <div className="max-w-3xl mx-auto bg-card text-card-foreground rounded shadow p-6">
         <div className="flex items-start gap-4 mb-4">
-          <button
+          <Button
             type="button"
             onClick={() => navigate(-1)}
-            className="p-2 rounded border border-border bg-background hover:bg-accent/5"
+            className="text-black dark:text-white p-2 rounded border border-border bg-background hover:bg-accent/5"
             aria-label="Go back"
           >
             <MoveLeft />
-          </button>
+          </Button>
 
           <div>
             <h2 className="text-lg font-semibold">
@@ -214,7 +244,10 @@ export default function AddEquipments() {
                   min={0}
                   step={1}
                   value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  onChange={(e) => {
+                    const nextValue = Number(e.target.value);
+                    setQuantity(Number.isFinite(nextValue) ? nextValue : 0);
+                  }}
                   className="w-full text-center border border-border bg-input text-foreground srounded focus:border-ring py-2"
                   aria-label="Quantity"
                 />
@@ -256,27 +289,31 @@ export default function AddEquipments() {
             <textarea
               id="description"
               name="description"
-              className="w-full h-24 border border-border bg-input text-foreground placeholder:text-muted-foreground px-3 py-2 rounded focus:border-ring"
+              className="w-full border border-border bg-input text-foreground placeholder:text-muted-foreground px-3 py-2 rounded focus:border-ring resize-none overflow-hidden"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
+              rows={2}
             />
           </div>
           <div className="col-span-2 flex flex-col sm:flex-row justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={() => navigate("/equipments")}
-              className="px-4 py-2 rounded border border-border bg-background hover:bg-accent/5 w-full sm:w-auto"
+              className="text-black dark:text-white px-4 py-2 rounded border border-border bg-background hover:bg-accent/5 w-full sm:w-auto"
             >
               Cancel
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="submit"
               className="px-4 py-2 rounded bg-primary text-primary-foreground w-full sm:w-auto"
             >
               {isEditing ? "Update Equipment" : "Add Equipment"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

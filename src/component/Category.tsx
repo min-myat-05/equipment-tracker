@@ -1,4 +1,11 @@
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type CategoryProps = {
   value?: string;
@@ -11,25 +18,22 @@ export default function Category({ value, onChange }: CategoryProps) {
   return (
     <div>
       <div>
-        <select
-          id="category"
-          name="category"
-          className="w-full border border-border bg-input text-foreground px-3 py-2 rounded focus:border-ring"
+        <Select
           value={currentValue}
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            setLocalCategory(nextValue);
-            onChange?.(nextValue);
+          onValueChange={(value) => {
+            setLocalCategory(value);
+            onChange?.(value);
           }}
         >
-          <option value={"PC"}>PC</option>
-          <option value={"Digital Devices & Accessories"}>
-            Digital Devices & Accessories
-          </option>
-          <option value={"Network Devices & Accessories"}>
-            Network Devices & Accessories
-          </option>
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="PC">PC</SelectItem>
+            <SelectItem value="Digital Device">Digital Device</SelectItem>
+            <SelectItem value="Network Device">Network Device</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
