@@ -29,6 +29,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const skipLog = Boolean((error as any)?.config?.skipGlobalErrorLog);
+    if (skipLog) {
+      return Promise.reject(error);
+    }
     if (error.response) {
       // Server responded with error
       console.error("Error:", error.response.data);

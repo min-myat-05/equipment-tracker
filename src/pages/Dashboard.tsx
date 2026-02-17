@@ -21,11 +21,6 @@ import { useEffect, useState } from "react";
 import { getEquipments } from "@/services/equitmentService";
 export default function Dashboard() {
   const [data, setData] = useState<Equipment[]>([]);
-  // useEffect(() => {
-  //   fetch(api)
-  //     .then((res) => res.json())
-  //     .then((data) => setData(data));
-  // }, []);
   useEffect(() => {
     fetchEquipment();
   }, []);
@@ -50,10 +45,8 @@ export default function Dashboard() {
 
   const normalizeDeployment = (value: string) => {
     const key = value.trim().toLowerCase();
-    if (key === "ft" || key === "full-time" || key === "full time")
-      return "FT";
-    if (key === "pt" || key === "part-time" || key === "part time")
-      return "PT";
+    if (key === "ft" || key === "full-time" || key === "full time") return "FT";
+    if (key === "pt" || key === "part-time" || key === "part time") return "PT";
     if (key === "rs" || key === "reserve") return "RS";
     if (key === "sp" || key === "surplus") return "SP";
     return value.toUpperCase();

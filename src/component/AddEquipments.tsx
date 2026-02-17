@@ -7,6 +7,7 @@ import Category from "./Category";
 import { Button } from "@/components/ui/button";
 import {
   getEquipmentById,
+  getEquipments,
   createEquipment,
   updateEquipment,
 } from "../services/equitmentService";
@@ -40,9 +41,14 @@ export default function AddEquipments() {
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const getErrorMessage = (err: unknown) =>
+    (err as any)?.response?.data?.message ||
+    (err as any)?.response?.data?.error ||
+    (err as Error)?.message ||
+    String(err);
 
   useEffect(() => {
-    if (!isEditing || !recordId) return;
+    if (!isEditing || recordId === null) return;
 
     setIsLoading(true);
 
@@ -101,9 +107,7 @@ export default function AddEquipments() {
           (data as any).Description ?? (data as any).description ?? "",
         );
       })
-      .catch((err) =>
-        setError(err instanceof Error ? err.message : String(err)),
-      )
+      .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setIsLoading(false));
   }, [isEditing, recordId]);
 
@@ -136,14 +140,37 @@ export default function AddEquipments() {
     };
 
     try {
+      const existingItems = await getEquipments();
+      const normalizedIdNo = idNo.trim().toLowerCase();
+      const duplicate = (existingItems as any[]).find((item) => {
+        const existingIdNo = String(
+          item?.["ID No."] ?? item?.id_no ?? "",
+        ).trim().toLowerCase();
+        if (!existingIdNo) return false;
+        if (existingIdNo !== normalizedIdNo) return false;
+        if (isEditing) {
+          return Number(item?.id) !== Number(recordId);
+        }
+        return true;
+      });
+
+      if (duplicate) {
+        setError("ID No already exists");
+        return;
+      }
+
       if (isEditing) {
+        if (recordId === null || Number.isNaN(recordId)) {
+          setError("Invalid equipment ID for update");
+          return;
+        }
         await updateEquipment(recordId, payload);
       } else {
         await createEquipment(payload);
       }
       navigate("/equipments");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     }
   };
 

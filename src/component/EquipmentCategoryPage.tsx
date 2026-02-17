@@ -260,8 +260,13 @@ export default function EquipmentCategoryPage({
                   <TableCell className="text-sm px-4 py-3 text-foreground text-center">
                     {item["ID No."]}
                   </TableCell>
-                  <TableCell className="text-sm px-4 py-3 text-foreground text-center">
-                    {item["Maker,Model & Type"]}
+                  <TableCell className="text-sm px-4 py-3 text-foreground text-left align-top">
+                    <p
+                      className="overflow-hidden break-words whitespace-normal [display:-webkit-box] [-webkit-line-clamp:3] [-webkit-box-orient:vertical]"
+                      title={item["Maker,Model & Type"]}
+                    >
+                      {item["Maker,Model & Type"]}
+                    </p>
                   </TableCell>
                   <TableCell className="text-sm px-4 py-3 text-foreground text-center">
                     {item.Category}
