@@ -1,16 +1,62 @@
-# React + Vite
+# Equipment Tracker (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Equipment inventory UI for tracking PCs, digital devices, and network devices. Built with React 19, Vite (rolldown), React Router, Tailwind CSS, and a local `json-server` backend for data.
 
-Currently, two official plugins are available:
+## Features
+- Login screen (client-side only; no real auth yet)
+- Dashboard with totals and charts
+- Equipment list with search, condition/deployment filters, pagination
+- Add/Edit equipment form
+- CSV export (all or filtered)
+- Category pages: PC, Digital Device, Network Device
+- Light/Dark mode toggle and avatar menu
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- React 19 + TypeScript
+- Vite (rolldown build)
+- React Router
+- Tailwind CSS + Radix UI primitives
+- Recharts for charts
+- `json-server` for local API
 
-## React Compiler
+## Getting Started
+1) Install dependencies
+```bash
+npm install
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2) Start the local API (json-server)
+```bash
+npm run server
+```
 
-## Expanding the ESLint configuration
+3) Start the app (new terminal)
+```bash
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The frontend expects the API at `http://localhost:3000/equipments`.
+
+## Scripts
+- `npm run dev` - Start Vite dev server
+- `npm run build` - Production build
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run server` - Start json-server on port 3000
+
+## Data
+Local data is stored in `src/data/db.json` and served by `json-server`.
+
+## Routes
+- `/` Login
+- `/dashboard` Dashboard
+- `/equipments` All equipment
+- `/equipments/add` Add equipment
+- `/equipments/edit/:id` Edit equipment
+- `/pc` PC inventory
+- `/digital-device` Digital device inventory
+- `/network-device` Network device inventory
+
+## Notes
+- The login form is UI-only; navigation is client-side.
+- Update the API base URL if you run json-server on a different host/port.
