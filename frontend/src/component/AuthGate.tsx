@@ -1,8 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
-const PENDING_ROUTE = "/pending";
-const SUPER_ADMIN_ONLY = ["/notifications"];
+const SUPER_ADMIN_ONLY = ["/admin/create"];
 
 export default function AuthGate() {
   const { user, loading } = useAuth();
@@ -19,12 +18,6 @@ export default function AuthGate() {
 
   if (!user) {
     return <Navigate to="/login" replace />;
-  }
-
-  if (user.status !== "active" && user.role !== "super_admin") {
-    if (!path.startsWith(PENDING_ROUTE)) {
-      return <Navigate to={PENDING_ROUTE} replace />;
-    }
   }
 
   if (SUPER_ADMIN_ONLY.some((route) => path.startsWith(route)) && user.role !== "super_admin") {

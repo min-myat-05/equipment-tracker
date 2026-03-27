@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./component/LoginForm";
-import RegisterForm from "./component/RegisterForm";
+
 import Dashboard from "./pages/Dashboard";
 import Equipments from "./pages/Equipments";
 import RootLayout from "./pages/RootLayout";
@@ -9,8 +9,9 @@ import PC from "./pages/PC";
 import Digital_Device from "./pages/Digital_Device";
 import Network_Device from "./pages/Network_Device";
 import AuthGate from "./component/AuthGate";
-import PendingApproval from "./pages/PendingApproval";
-import Notifications from "./pages/Notifications";
+import CreateAdminAccount from "./pages/CreateAdminAccount";
+import ChangePassword from "./pages/ChangePassword";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -21,16 +22,8 @@ export const router = createBrowserRouter([
     Component: LoginForm,
   },
   {
-    path: "/register",
-    Component: RegisterForm,
-  },
-  {
     Component: AuthGate,
     children: [
-      {
-        path: "/pending",
-        Component: PendingApproval,
-      },
       {
         Component: RootLayout,
         children: [
@@ -75,8 +68,12 @@ export const router = createBrowserRouter([
             Component: AddEquipments,
           },
           {
-            path: "/notifications",
-            Component: Notifications,
+            path: "/admin/create",
+            Component: CreateAdminAccount,
+          },
+          {
+            path: "/change-password",
+            Component: ChangePassword,
           },
         ],
       },

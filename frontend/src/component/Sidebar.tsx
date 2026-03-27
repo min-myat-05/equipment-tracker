@@ -1,51 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import {
-  Bell,
-  LayoutDashboard,
-  Wrench,
-  Computer,
-  Gpu,
-  Network,
-} from "lucide-react";
+import { UserPlus, LayoutDashboard, Wrench, Computer, Gpu, Network } from "lucide-react";
 import logo from "../assets/logo.jpg";
 import { useAuth } from "@/context/AuthContext";
-import { listPendingUsers } from "@/services/authService";
 export default function Sidebar() {
   const { user } = useAuth();
   const isSuperAdmin = user?.role === "super_admin";
-  const [pendingCount, setPendingCount] = useState(0);
   const linkBase =
-    "flex items-center gap-3 px-3 py-2 rounded-sm border-l-4 transition-colors";
-
-  const refreshPendingCount = useCallback(async () => {
-    if (!isSuperAdmin) {
-      setPendingCount(0);
-      return;
-    }
-    try {
-      const data = await listPendingUsers();
-      setPendingCount(data.length);
-    } catch {
-      setPendingCount(0);
-    }
-  }, [isSuperAdmin]);
-
-  useEffect(() => {
-    refreshPendingCount();
-  }, [refreshPendingCount]);
-
-  useEffect(() => {
-    if (!isSuperAdmin) return;
-    const handleUpdate = () => {
-      refreshPendingCount();
-    };
-    window.addEventListener("pending-users-updated", handleUpdate);
-    return () => {
-      window.removeEventListener("pending-users-updated", handleUpdate);
-    };
-  }, [isSuperAdmin, refreshPendingCount]);
-
+    "flex items-center gap-3 px-2 py-2 rounded border-l-4 transition-colors duration-200";
   return (
     <aside className="bg-[#f7f8f8] dark:bg-sidebar-border p-5 h-full">
       <div className="mb-4">
@@ -141,7 +102,7 @@ export default function Sidebar() {
         </NavLink>
         {isSuperAdmin && (
           <NavLink
-            to="/notifications"
+            to="/admin/create"
             className={({ isActive }) =>
               `${linkBase} ${
                 isActive
@@ -150,13 +111,8 @@ export default function Sidebar() {
               }`
             }
           >
-            <Bell />
-            <span className="text-sm">Notifications</span>
-            {pendingCount > 0 ? (
-              <span className="ml-auto rounded-full bg-destructive px-2 py-0.5 text-[11px] font-semibold text-white">
-                {pendingCount}
-              </span>
-            ) : null}
+            <UserPlus />
+            <span className="text-sm">Create Admin</span>
           </NavLink>
         )}
       </nav>

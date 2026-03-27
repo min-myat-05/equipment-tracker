@@ -15,11 +15,10 @@ export interface titleType {
 
 export interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
   password: string;
-  role: "super_admin" | "user";
-  status: "pending" | "active" | "rejected";
+  role: "super_admin" | "admin";
   createdAt?: string;
   updatedAt?: string;
 }

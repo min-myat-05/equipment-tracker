@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import backgroundImage from "../assets/TUM-4-1536x1152.jpg";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
@@ -23,8 +23,6 @@ export default function LoginForm() {
         setTheme(previousTheme);
       }
     };
-    // Intentionally run once to avoid flipping themes on updates.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -41,11 +39,7 @@ export default function LoginForm() {
           setError(result.error ?? "Login failed.");
           return;
         }
-        if (result.user?.status === "active" || result.user?.role === "super_admin") {
-          navigate("/dashboard");
-        } else {
-          navigate("/pending");
-        }
+        navigate("/dashboard");
       })
       .finally(() => setIsSubmitting(false));
   };
@@ -103,18 +97,11 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-70"
+            className="w-full rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
-
-        <p className="text-sm text-slate-900 mt-4">
-          Need an account?{" "}
-          <Link className="text-primary underline" to="/register">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );

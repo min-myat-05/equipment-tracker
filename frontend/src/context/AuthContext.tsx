@@ -8,71 +8,66 @@ import {
   type ReactNode,
 } from "react";
 import {
-  findUserByEmail,
-  getUserById,
   loginUser,
-  registerUser,
-  type UserRecord,
+  createAdminAccount,
+  getWhoAmI,
+  refreshAccessToken,
+  logoutUser,
+  changePassword as changePasswordApi,
+  type AuthUser,
   type UserRole,
-  type UserStatus,
 } from "@/services/authService";
-
-export type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  status: UserStatus;
-};
 
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; user?: AuthUser }>;
-  register: (input: { name: string; email: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
-  logout: () => void;
-  refresh: () => Promise<void>;
+  createAdmin: (input: { username: string; email: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
 };
 
-const STORAGE_KEY = "equipment_auth_user";
+const ACCESS_TOKEN_KEY = "token";
+const ACCESS_TOKEN_ALT_KEY = "access_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
+const LEGACY_USER_KEY = "equipment_auth_user";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const sanitizeUser = (record: UserRecord): AuthUser => ({
-  id: String(record.id),
-  name: record.name,
-  email: record.email,
-  role: record.role ?? "user",
-  status: record.status ?? "pending",
-});
+const extractUser = (payload: any): AuthUser | null => {
+  const candidate = payload?.user ?? payload;
+  if (!candidate) return null;
+  return {
+    id: String(candidate.id ?? ""),
+    username: candidate.username ?? candidate.name ?? "",
+    email: candidate.email ?? "",
+    role: (candidate.role ?? "admin") as UserRole,
+  };
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const getErrorMessage = (err: unknown) => {
+    const anyErr = err as any;
+    return (
+      anyErr?.response?.data?.message ||
+      anyErr?.response?.data?.detail ||
+      anyErr?.response?.data?.error ||
+      anyErr?.message ||
+      "Request failed."
+    );
+  };
 
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const parsed = JSON.parse(raw) as AuthUser;
-      setUser(parsed);
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const persistUser = useCallback((nextUser: AuthUser | null) => {
-    if (nextUser) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-    setUser(nextUser);
+  const clearSession = useCallback(() => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_ALT_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_USER_KEY);
+    setUser(null);
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -81,67 +76,150 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: "Email and password are required." };
     }
     try {
-      const results = await loginUser(cleanedEmail, password);
-      if (!results.length) {
-        return { ok: false, error: "Invalid email or password." };
+      const result = await loginUser(cleanedEmail, password);
+      const accessToken =
+        (result as any)?.tokens?.access ??
+        (result as any)?.tokens?.access_token ??
+        (result as any).access_token ??
+        result.accessToken ??
+        result.token;
+      const refreshToken =
+        (result as any)?.tokens?.refresh ??
+        (result as any)?.tokens?.refresh_token ??
+        (result as any).refresh_token ??
+        result.refreshToken;
+      if (accessToken) {
+        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+        localStorage.setItem(ACCESS_TOKEN_ALT_KEY, accessToken);
       }
-      const nextUser = sanitizeUser(results[0]);
-      if (nextUser.status === "rejected") {
-        return { ok: false, error: "Your account was rejected. Please contact the administrator." };
-      }
-      persistUser(nextUser);
-      return { ok: true, user: nextUser };
-    } catch {
-      return { ok: false, error: "Login failed. Please try again." };
-    }
-  }, [persistUser]);
-
-  const register = useCallback(async (input: { name: string; email: string; password: string }) => {
-    const name = input.name.trim();
-    const email = input.email.trim().toLowerCase();
-    const password = input.password.trim();
-    if (!name || !email || !password) {
-      return { ok: false, error: "All fields are required." };
-    }
-
-    try {
-      const existing = await findUserByEmail(email);
-      if (existing.length > 0) {
-        return { ok: false, error: "An account with this email already exists." };
+      if (refreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       }
 
-      await registerUser({
-        name,
-        email,
-        password,
-        role: "user",
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      });
+      const userFromLogin = extractUser(result);
+      if (userFromLogin) {
+        setUser(userFromLogin);
+        return { ok: true, user: userFromLogin };
+      }
 
-      return { ok: true };
-    } catch {
-      return { ok: false, error: "Registration failed. Please try again." };
+      const who = await getWhoAmI();
+      const resolved = extractUser(who);
+      if (!resolved) {
+        return { ok: false, error: "Unable to load user profile." };
+      }
+      setUser(resolved);
+      return { ok: true, user: resolved };
+    } catch (err) {
+      return { ok: false, error: getErrorMessage(err) };
     }
   }, []);
 
-  const logout = useCallback(() => {
-    persistUser(null);
-  }, [persistUser]);
-
-  const refresh = useCallback(async () => {
-    if (!user) return;
-    try {
-      const latest = await getUserById(user.id);
-      persistUser(sanitizeUser(latest));
-    } catch {
-      // If refresh fails, keep existing session to avoid kicking users out accidentally.
+  const createAdmin = useCallback(async (input: { username: string; email: string; password: string }) => {
+    const username = input.username.trim();
+    const email = input.email.trim().toLowerCase();
+    const password = input.password.trim();
+    if (!username || !email || !password) {
+      return { ok: false, error: "All fields are required." };
     }
-  }, [user, persistUser]);
+    try {
+      await createAdminAccount({
+        username,
+        email,
+        password,
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: getErrorMessage(err) };
+    }
+  }, []);
+
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    const current = currentPassword.trim();
+    const next = newPassword.trim();
+    if (!current || !next) {
+      return { ok: false, error: "Current and new passwords are required." };
+    }
+    try {
+      await changePasswordApi({ currentPassword: current, newPassword: next });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: getErrorMessage(err) };
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) ?? undefined;
+    try {
+      await logoutUser(refreshToken);
+    } catch (err) {
+      // Ignore logout errors, clear local session anyway.
+    } finally {
+      clearSession();
+    }
+  }, [clearSession]);
+
+  useEffect(() => {
+    localStorage.removeItem(LEGACY_USER_KEY);
+    const hydrate = async () => {
+      const accessToken =
+        localStorage.getItem(ACCESS_TOKEN_KEY) ??
+        localStorage.getItem(ACCESS_TOKEN_ALT_KEY);
+      if (!accessToken) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const who = await getWhoAmI();
+        const resolved = extractUser(who);
+        if (!resolved) {
+          throw new Error("Invalid profile");
+        }
+        setUser(resolved);
+      } catch {
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        if (refreshToken) {
+          try {
+            const refreshed = await refreshAccessToken(refreshToken);
+            const nextToken =
+              (refreshed as any)?.tokens?.access ??
+              (refreshed as any)?.tokens?.access_token ??
+              (refreshed as any).access_token ??
+              refreshed.accessToken ??
+              refreshed.token;
+            if (!nextToken) {
+              throw new Error("Refresh failed");
+            }
+            localStorage.setItem(ACCESS_TOKEN_KEY, nextToken);
+            localStorage.setItem(ACCESS_TOKEN_ALT_KEY, nextToken);
+            const who = await getWhoAmI();
+            const resolved = extractUser(who);
+            if (!resolved) {
+              throw new Error("Invalid profile");
+            }
+            setUser(resolved);
+          } catch {
+            clearSession();
+          }
+        } else {
+          clearSession();
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    hydrate();
+  }, [clearSession]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, login, register, logout, refresh }),
-    [user, loading, login, register, logout, refresh],
+    () => ({
+      user,
+      loading,
+      login,
+      createAdmin,
+      logout,
+      changePassword,
+    }),
+    [user, loading, login, createAdmin, logout, changePassword],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,61 +1,64 @@
 import api from "@/lib/authApi";
 
-export type UserRole = "super_admin" | "user";
-export type UserStatus = "pending" | "active" | "rejected";
+export type UserRole = "super_admin" | "admin";
 
-export type UserRecord = {
+export type AuthUser = {
   id: string;
-  name: string;
+  username: string;
   email: string;
-  password: string;
   role: UserRole;
-  status: UserStatus;
-  createdAt?: string;
-  updatedAt?: string;
 };
 
-const usersPath = "/users";
-
-export const getUserById = async (id: string) => {
-  const response = await api.get<UserRecord>(`${usersPath}/${id}`);
-  return response.data;
-};
-
-export const findUserByEmail = async (email: string) => {
-  const response = await api.get<UserRecord[]>(usersPath, {
-    params: { email },
-  });
-  return response.data;
+type LoginResponse = {
+  accessToken?: string;
+  refreshToken?: string;
+  token?: string;
+  refresh_token?: string;
+  user?: AuthUser;
 };
 
 export const loginUser = async (email: string, password: string) => {
-  const response = await api.get<UserRecord[]>(usersPath, {
-    params: { email, password },
+  const response = await api.post<LoginResponse>("/api/auth/login", {
+    email,
+    password,
   });
   return response.data;
 };
 
-export const registerUser = async (payload: Omit<UserRecord, "id">) => {
-  const response = await api.post<UserRecord>(usersPath, payload);
+export const getWhoAmI = async () => {
+  const response = await api.get<AuthUser | { user: AuthUser }>("/api/auth/whoami");
   return response.data;
 };
 
-export const listPendingUsers = async () => {
-  const response = await api.get<UserRecord[]>(usersPath, {
-    params: { status: "pending" },
-  });
+export const createAdminAccount = async (payload: {
+  username: string;
+  email: string;
+  password: string;
+}) => {
+  const response = await api.post<AuthUser>("/api/auth/admins", payload);
   return response.data;
 };
 
-export const updateUserStatus = async (
-  id: string,
-  status: UserStatus,
-  meta: Partial<UserRecord> = {},
-) => {
-  const response = await api.patch<UserRecord>(`${usersPath}/${id}`, {
-    status,
-    ...meta,
-    updatedAt: new Date().toISOString(),
+export const refreshAccessToken = async (refreshToken?: string) => {
+  const response = await api.post<{
+    accessToken?: string;
+    token?: string;
+  }>("/api/auth/refresh", refreshToken ? { refreshToken } : undefined);
+  return response.data;
+};
+
+export const logoutUser = async (refreshToken?: string) => {
+  const response = await api.post("/api/auth/logout", refreshToken ? { refreshToken } : undefined);
+  return response.data;
+};
+
+export const changePassword = async (payload: {
+  currentPassword: string;
+  newPassword: string;
+}) => {
+  const response = await api.post("/api/auth/change-password", {
+    current_password: payload.currentPassword,
+    new_password: payload.newPassword,
   });
   return response.data;
 };
