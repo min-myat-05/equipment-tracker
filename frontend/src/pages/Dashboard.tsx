@@ -52,18 +52,31 @@ export default function Dashboard() {
     return value.toUpperCase();
   };
 
-  const Pc = data.filter((item) => item.Category === "PC");
-  const Digital_Device = data.filter(
-    (item) => item.Category === "Digital Device",
+  const getQuantityValue = (item: Equipment) => {
+    const quantity = Number(item.Quantity ?? 0);
+    return Number.isFinite(quantity) ? quantity : 0;
+  };
+
+  const sumCategoryQuantity = (category: Equipment["Category"]) =>
+    data.reduce(
+      (total, item) =>
+        item.Category === category ? total + getQuantityValue(item) : total,
+      0,
+    );
+
+  const totalQuantity = data.reduce(
+    (total, item) => total + getQuantityValue(item),
+    0,
   );
-  const Network_Device = data.filter(
-    (item) => item.Category === "Network Device",
-  );
+  const pcQuantity = sumCategoryQuantity("PC");
+  const digitalDeviceQuantity = sumCategoryQuantity("Digital Device");
+  const networkDeviceQuantity = sumCategoryQuantity("Network Device");
 
   const conditionCounts = data.reduce(
     (acc, item) => {
+      const quantity = getQuantityValue(item);
       const key = normalizeCondition(item.Condition ?? "");
-      if (key in acc) acc[key as keyof typeof acc] += 1;
+      if (key in acc) acc[key as keyof typeof acc] += quantity;
       return acc;
     },
     { RN: 0, RP: 0, US: 0, "W/O": 0 },
@@ -71,8 +84,9 @@ export default function Dashboard() {
 
   const deploymentCounts = data.reduce(
     (acc, item) => {
+      const quantity = getQuantityValue(item);
       const key = normalizeDeployment(item.Deployment ?? "");
-      if (key in acc) acc[key as keyof typeof acc] += 1;
+      if (key in acc) acc[key as keyof typeof acc] += quantity;
       return acc;
     },
     { FT: 0, PT: 0, RS: 0, SP: 0 },
@@ -99,25 +113,25 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>Total Equipment</CardTitle>
           </CardHeader>
-          <CardDescription>{data.length}</CardDescription>
+          <CardDescription>{totalQuantity}</CardDescription>
         </Card>
         <Card className="w-full h-32">
           <CardHeader>
             <CardTitle>PC Inventory</CardTitle>
           </CardHeader>
-          <CardDescription>{Pc.length}</CardDescription>
+          <CardDescription>{pcQuantity}</CardDescription>
         </Card>
         <Card className="w-full h-32">
           <CardHeader>
             <CardTitle>Digital Device</CardTitle>
           </CardHeader>
-          <CardDescription>{Digital_Device.length}</CardDescription>
+          <CardDescription>{digitalDeviceQuantity}</CardDescription>
         </Card>
         <Card className="w-full ">
           <CardHeader>
             <CardTitle>Network Device</CardTitle>
           </CardHeader>
-          <CardDescription>{Network_Device.length}</CardDescription>
+          <CardDescription>{networkDeviceQuantity}</CardDescription>
         </Card>
       </div>
       <div className="grid md:grid-cols-2 gap-5 mt-5">
